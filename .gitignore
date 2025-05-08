@@ -3,12 +3,16 @@
 # dependencies
 /node_modules
 /.pnp
+<<<<<<< HEAD
 .pnp.*
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+=======
+.pnp.js
+>>>>>>> 4f73539288f40bb42c31ed598e24f30e8b8359f9
 
 # testing
 /coverage
@@ -30,12 +34,27 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+<<<<<<< HEAD
 # env files (can opt-in for committing if needed)
 .env*
+=======
+# local env files
+.env*
+!.env.example
+>>>>>>> 4f73539288f40bb42c31ed598e24f30e8b8359f9
 
 # vercel
 .vercel
 
+<<<<<<< HEAD
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+=======
+# stackbit
+.cache
+.stackbit/cache
+
+# Local Netlify folder
+.netlify
+>>>>>>> 4f73539288f40bb42c31ed598e24f30e8b8359f9
