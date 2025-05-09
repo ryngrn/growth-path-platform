@@ -4,7 +4,8 @@ publish = ".next"
 
 [build.environment]
 NEXT_TELEMETRY_DISABLED = "1"
-NODE_VERSION = "18"
+NODE_VERSION = "20"
+NPM_FLAGS = "--legacy-peer-deps"
 
 [[plugins]]
 package = "@netlify/plugin-nextjs"
@@ -14,4 +15,10 @@ directory = "netlify/functions"
 
 [[edge_functions]]
 path = "/*"
-function = "next" 
+function = "next"
+
+[build.cache]
+paths = [
+  ".next/cache",
+  "node_modules/.cache"
+] 
