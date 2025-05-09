@@ -71,7 +71,7 @@ export default function ChildPath({
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="font-roca text-3xl">{childName}'s {pathName} Path</h1>
+            <h1 className="font-roca text-3xl">{childName}&apos;s {pathName} Path</h1>
             <p className="text-gray-600">Track progress and learn new skills</p>
           </div>
           <Link href="/dashboard" className="btn-secondary">

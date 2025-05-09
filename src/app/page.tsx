@@ -173,7 +173,7 @@ export default function LoginPage() {
               onClick={() => setIsLogin(!isLogin)}
               className="text-blue-800 hover:text-blue-900 font-medium"
             >
-              {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+              {isLogin ? "Don&apos;t have an account? Sign up" : 'Already have an account? Sign in'}
             </button>
           </div>
         </Card>

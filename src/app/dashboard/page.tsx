@@ -369,7 +369,7 @@ export default function DashboardPage() {
                 <form onSubmit={handleAddChild} className="space-y-[60px]">
                   <TextField
                     fullWidth
-                    label="Child's Name"
+                    label="Child&apos;s Name"
                     value={childForm.name}
                     onChange={(e) => setChildForm({ ...childForm, name: e.target.value })}
                     required
@@ -474,7 +474,7 @@ export default function DashboardPage() {
           <div className="text-center">
             <h3 className="text-xl font-semibold text-gray-800 mb-4">Remove Child</h3>
             <p className="text-xl mb-6">
-              Are you sure you want to remove <span className="font-bold">{children.find(c => c._id === showDeleteConfirm)?.name}</span>? You'll lose all learning progress and it can't be recovered.
+              Are you sure you want to remove <span className="font-bold">{children.find(c => c._id === showDeleteConfirm)?.name}</span>? You&apos;ll lose all learning progress and it can&apos;t be recovered.
             </p>
             {deleteError && (
               <p className="text-red-500 mb-4">{deleteError}</p>
