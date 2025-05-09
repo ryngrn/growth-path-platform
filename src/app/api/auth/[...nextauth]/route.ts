@@ -1,6 +1,8 @@
 import { config } from '@/auth';
 import NextAuth from 'next-auth';
+import type { NextRequest } from 'next/server';
 
 const handler = NextAuth(config);
 
-export { handler as GET, handler as POST }; 
+export const GET = handler;
+export const POST = handler; 

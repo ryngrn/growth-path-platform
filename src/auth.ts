@@ -75,6 +75,7 @@ export const config = {
   ],
   session: {
     strategy: 'jwt' as const,
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
     signIn: '/',
@@ -96,6 +97,7 @@ export const config = {
       return session;
     },
   },
+  secret: process.env.NEXTAUTH_SECRET,
 } satisfies NextAuthConfig;
 
 export const { auth, signIn, signOut } = NextAuth(config); 
