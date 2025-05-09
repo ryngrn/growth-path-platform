@@ -1,16 +1,16 @@
 [build]
-  command = "npm run build"
-  publish = ".next"
+command = "npm run build"
+publish = ".next"
 
 [build.environment]
-  NEXT_TELEMETRY_DISABLED = "1"
-  NODE_VERSION = "18"
+NEXT_TELEMETRY_DISABLED = "1"
+NODE_VERSION = "18"
 
 [[plugins]]
-  package = "@netlify/plugin-nextjs"
+package = "@netlify/plugin-nextjs"
 
 [functions]
-  directory = "netlify/functions"
+directory = "netlify/functions"
 
 [edge_functions]
-  directory = "netlify/edge-functions" 
+directory = "netlify/edge-functions" 
