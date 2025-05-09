@@ -95,7 +95,7 @@ export default function Search() {
         <div className="mb-6">
           <input
             type="text"
-            className="input mb-4"
+            className="input mb-4 text-black"
             placeholder="Search paths..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

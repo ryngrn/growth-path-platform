@@ -13,7 +13,7 @@ export interface IChild extends Document {
 const ChildSchema = new Schema<IChild>(
   {
     name: { type: String, required: true },
-    gender: { type: String, enum: ['female', 'male', 'other'], required: true },
+    gender: { type: String, enum: ['female', 'male', 'other'] },
     birthday: { type: Date, required: true },
     parent: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     paths: [{ type: Schema.Types.ObjectId, ref: 'Path' }],

@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: #D9E0F8;
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@font-face {
+  font-family: 'RocaOne';
+  src: url('/fonts/RocaOne-Bold.woff2') format('woff2'),
+       url('/fonts/RocaOne-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'RocaOne';
+  src: url('/fonts/RocaOne-BdIt.woff2') format('woff2'),
+       url('/fonts/RocaOne-BdIt.woff') format('woff');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'RocaOne';
+  src: url('/fonts/RocaOne-It.woff2') format('woff2'),
+       url('/fonts/RocaOne-It.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'RocaOne';
+  src: url('/fonts/RocaOne-Rg.woff2') format('woff2'),
+       url('/fonts/RocaOne-Rg.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'RocaOne';
+  src: url('/fonts/RocaOne-Th.woff2') format('woff2'),
+       url('/fonts/RocaOne-Th.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'RocaOne';
+  src: url('/fonts/RocaOne-ThIt.woff2') format('woff2'),
+       url('/fonts/RocaOne-ThIt.woff') format('woff');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'RocaOne', sans-serif;
+}
+
