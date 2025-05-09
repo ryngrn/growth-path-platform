@@ -1,8 +1,6 @@
-import { config } from '@/auth';
+import { authOptions } from '@/app/utils/authOptions';
 import NextAuth from 'next-auth';
-import type { NextRequest } from 'next/server';
 
-const handler = NextAuth(config);
+const handler = NextAuth(authOptions);
 
-export const GET = handler;
-export const POST = handler; 
+export { handler as GET, handler as POST }; 
