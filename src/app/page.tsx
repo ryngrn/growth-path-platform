@@ -3,14 +3,13 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Card } from '@/components/card';
-import { ContextAlert } from '@/components/context-alert';
-import Image from 'next/image';
+import { Box, Button, Container, TextField, Typography, Alert } from '@mui/material';
+import type { FormEvent, ChangeEvent } from 'react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [isLogin, setIsLogin] = useState(true);
-  const [error, setError] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -18,25 +17,30 @@ export default function LoginPage() {
     familyName: '',
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (isLogin) {
-      // Handle login
+  const handleSignIn = async () => {
+    try {
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
         redirect: false,
+        callbackUrl: '/dashboard',
       });
 
       if (result?.error) {
-        setError(result.error);
+        setErrorMessage('Invalid email or password');
       } else {
         router.push('/dashboard');
       }
-    } else {
-      // Handle registration
+    } catch (err) {
+      setErrorMessage('Sign in failed');
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+
+    if (isRegistering) {
       try {
         const response = await fetch('/api/auth/register', {
           method: 'POST',
@@ -46,138 +50,121 @@ export default function LoginPage() {
           body: JSON.stringify(formData),
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-          const data = await response.json();
           throw new Error(data.message || 'Registration failed');
         }
 
-        // Log in automatically after registration
-        const result = await signIn('credentials', {
-          email: formData.email,
-          password: formData.password,
-          redirect: false,
-        });
-
-        if (result?.error) {
-          throw new Error(result.error);
-        }
-
-        router.push('/onboarding');
+        // After successful registration, sign in
+        await handleSignIn();
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        setErrorMessage(err instanceof Error ? err.message : 'Registration failed');
       }
+    } else {
+      await handleSignIn();
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-[#EF4136] to-[#FBB040] flex items-center justify-center">
-      <div className="w-full max-w-md px-4">
-        <div className="text-center mb-8">
-          <Image
-            src="/images/logo.svg"
-            alt="GrowthPath Logo"
-            width={200}
-            height={60}
-            className="mx-auto"
-          />
-        </div>
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Typography component="h1" variant="h5">
+          {isRegistering ? 'Register' : 'Sign in'}
+        </Typography>
 
-        <Card>
-          <h1 className="text-2xl font-bold text-center mb-6 text-black">
-            {isLogin ? 'Welcome Back' : 'Create Your Account'}
-          </h1>
+        {errorMessage && (
+          <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
+            {errorMessage}
+          </Alert>
+        )}
 
-          {error && (
-            <ContextAlert
-              message={error}
-              type="error"
-              className="mb-4"
-            />
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          {isRegistering && (
+            <>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="firstName"
+                label="First Name"
+                name="firstName"
+                autoComplete="given-name"
+                value={formData.firstName}
+                onChange={handleChange}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="familyName"
+                label="Family Name"
+                name="familyName"
+                autoComplete="family-name"
+                value={formData.familyName}
+                onChange={handleChange}
+              />
+            </>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-black mb-1">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border rounded-md text-black placeholder-gray-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-black mb-1">
-                    Family Name
-                  </label>
-                  <input
-                    type="text"
-                    name="familyName"
-                    value={formData.familyName}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border rounded-md text-black placeholder-gray-500"
-                    required
-                  />
-                </div>
-              </>
-            )}
-            <div>
-              <label className="block text-sm font-medium text-black mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-md text-black placeholder-gray-500"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-black mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-md text-black placeholder-gray-500"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 font-medium"
-            >
-              {isLogin ? 'Sign In' : 'Create Account'}
-            </button>
-          </form>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
 
-          <div className="mt-4 text-center">
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-blue-800 hover:text-blue-900 font-medium"
-            >
-              {isLogin ? "Don&apos;t have an account? Sign up" : 'Already have an account? Sign in'}
-            </button>
-          </div>
-        </Card>
-      </div>
-    </div>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete={isRegistering ? 'new-password' : 'current-password'}
+            value={formData.password}
+            onChange={handleChange}
+          />
+
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            {isRegistering ? 'Register' : 'Sign In'}
+          </Button>
+
+          <Button
+            fullWidth
+            variant="text"
+            onClick={() => setIsRegistering(!isRegistering)}
+          >
+            {isRegistering ? 'Already have an account? Sign in' : 'Need an account? Register'}
+          </Button>
+        </Box>
+      </Box>
+    </Container>
   );
 }

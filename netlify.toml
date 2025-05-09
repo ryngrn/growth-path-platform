@@ -21,4 +21,9 @@ function = "next"
 paths = [
   ".next/cache",
   "node_modules/.cache"
-] 
+]
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200 

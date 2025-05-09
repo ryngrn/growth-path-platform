@@ -1,53 +1,55 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env');
-}
-
-interface MongooseCache {
+interface GlobalMongoose {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
 }
 
 declare global {
-  var mongoose: MongooseCache | undefined;
+  var mongoose: GlobalMongoose | undefined;
 }
 
-const cached: MongooseCache = global.mongoose || { conn: null, promise: null };
+const globalMongoose: GlobalMongoose = global.mongoose || {
+  conn: null,
+  promise: null,
+};
 
 if (!global.mongoose) {
-  global.mongoose = cached;
+  global.mongoose = globalMongoose;
 }
 
-async function connectDB() {
-  if (cached.conn) {
-    return cached.conn;
+const MONGODB_URI = process.env.MONGODB_URI!;
+
+if (!MONGODB_URI) {
+  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+}
+
+async function connectDB(): Promise<typeof mongoose> {
+  if (globalMongoose.conn) {
+    return globalMongoose.conn;
   }
 
-  if (!cached.promise) {
+  if (!globalMongoose.promise) {
     const opts = {
       bufferCommands: false,
-      ssl: true,
-      tls: true,
-      tlsAllowInvalidCertificates: true,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
       tlsAllowInvalidHostnames: true,
       retryWrites: true,
-      w: 1
+      w: 1,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI!, opts);
+    globalMongoose.promise = mongoose.connect(MONGODB_URI, opts);
   }
 
   try {
-    cached.conn = await cached.promise;
+    globalMongoose.conn = await globalMongoose.promise;
   } catch (e) {
-    cached.promise = null;
+    globalMongoose.promise = null;
     throw e;
   }
 
-  return cached.conn;
+  return globalMongoose.conn;
 }
 
 export default connectDB; 

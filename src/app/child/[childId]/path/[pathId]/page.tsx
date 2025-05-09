@@ -1,126 +1,120 @@
 'use client';
 
-import { useState } from 'react';
+import { Box, Typography, Button, LinearProgress } from '@mui/material';
+import { ArrowBack } from '@mui/icons-material';
 import Link from 'next/link';
 
-interface Skill {
-  id: string;
+interface PathData {
   name: string;
   description: string;
   ageRange: {
     min: number;
     max: number;
   };
-  scormData: {
-    status: 'not attempted' | 'incomplete' | 'completed' | 'passed' | 'failed';
-    score?: number;
-    timeSpent: number;
-    lastAttempt?: Date;
-  };
+  status: 'locked' | 'in_progress' | 'completed';
+  score: number;
+  timeSpent: number;
+  lastAttempt: Date;
 }
 
-export default function ChildPath({
-  params,
-}: {
-  params: { childId: string; pathId: string };
-}) {
-  // TODO: Replace with actual data from API
-  const [childName] = useState('Jack');
-  const [pathName] = useState('Cooking');
-  const [skills] = useState<Skill[]>([
-    {
-      id: 'sandwich',
-      name: 'Making Sandwiches',
-      description: 'Learn to make simple sandwiches',
-      ageRange: { min: 5, max: 7 },
-      scormData: {
-        status: 'incomplete',
-        score: 60,
-        timeSpent: 1200,
-        lastAttempt: new Date('2024-03-15'),
-      },
-    },
-    {
-      id: 'microwave',
-      name: 'Using the Microwave',
-      description: 'Learn to safely use a microwave',
-      ageRange: { min: 7, max: 9 },
-      scormData: {
-        status: 'not attempted',
-        timeSpent: 0,
-      },
-    },
-  ]);
+interface SkillData {
+  name: string;
+  description: string;
+  ageRange: {
+    min: number;
+    max: number;
+  };
+  status: 'locked' | 'in_progress' | 'completed';
+  score: number;
+  timeSpent: number;
+  lastAttempt: Date;
+}
 
-  const getStatusColor = (status: Skill['scormData']['status']) => {
-    switch (status) {
-      case 'completed':
-      case 'passed':
-        return 'bg-green-100 text-green-800';
-      case 'incomplete':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'failed':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+export default function ChildPath({ params }: { params: { childId: string; pathId: string } }) {
+  // Mock data - replace with actual data fetching
+  const path: PathData = {
+    name: 'Mathematics',
+    description: 'Basic arithmetic and problem-solving skills',
+    ageRange: { min: 5, max: 7 },
+    status: 'in_progress',
+    score: 60,
+    timeSpent: 1200,
+    lastAttempt: new Date(),
   };
 
+  const skills: SkillData[] = [
+    {
+      name: 'Addition',
+      description: 'Adding numbers up to 100',
+      ageRange: { min: 6, max: 8 },
+      status: 'completed',
+      score: 0,
+      timeSpent: 0,
+      lastAttempt: new Date(),
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="font-roca text-3xl">{childName}&apos;s {pathName} Path</h1>
-            <p className="text-gray-600">Track progress and learn new skills</p>
-          </div>
-          <Link href="/dashboard" className="btn-secondary">
-            Back to Dashboard
-          </Link>
-        </div>
+    <Box sx={{ p: 2 }}>
+      <Box sx={{ mb: 4 }}>
+        <Link href={`/child/${params.childId}`}>
+          <Button startIcon={<ArrowBack />}>Back to Paths</Button>
+        </Link>
+      </Box>
 
-        <div className="space-y-6">
-          {skills.map((skill) => (
-            <div key={skill.id} className="card">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h2 className="font-roca text-xl mb-2">{skill.name}</h2>
-                  <p className="text-gray-600">{skill.description}</p>
-                </div>
-                <span className="text-sm text-gray-500">
-                  Ages {skill.ageRange.min}-{skill.ageRange.max}
-                </span>
-              </div>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          {path.name}
+        </Typography>
+        <Typography variant="body1" color="text.secondary" gutterBottom>
+          {path.description}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Age Range: {path.ageRange.min}-{path.ageRange.max} years
+        </Typography>
+      </Box>
 
-              <div className="flex items-center gap-4 mb-4">
-                <span
-                  className={`px-3 py-1 rounded-full text-sm ${getStatusColor(
-                    skill.scormData.status
-                  )}`}
-                >
-                  {skill.scormData.status.charAt(0).toUpperCase() +
-                    skill.scormData.status.slice(1)}
-                </span>
-                {skill.scormData.score && (
-                  <span className="text-sm text-gray-600">
-                    Score: {skill.scormData.score}%
-                  </span>
-                )}
-                {skill.scormData.lastAttempt && (
-                  <span className="text-sm text-gray-600">
-                    Last attempt: {skill.scormData.lastAttempt.toLocaleDateString()}
-                  </span>
-                )}
-              </div>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          Progress
+        </Typography>
+        <LinearProgress
+          variant="determinate"
+          value={path.score}
+          sx={{ height: 10, borderRadius: 5 }}
+        />
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          {path.score}% Complete
+        </Typography>
+      </Box>
 
-              <div className="flex gap-4">
-                <button className="btn-primary flex-1">Start Learning</button>
-                <button className="btn-secondary flex-1">View Resources</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+      <Box>
+        <Typography variant="h6" gutterBottom>
+          Skills
+        </Typography>
+        {skills.map((skill, index) => (
+          <Box
+            key={index}
+            sx={{
+              p: 2,
+              mb: 2,
+              border: 1,
+              borderColor: 'divider',
+              borderRadius: 1,
+            }}
+          >
+            <Typography variant="subtitle1" gutterBottom>
+              {skill.name}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              {skill.description}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Age Range: {skill.ageRange.min}-{skill.ageRange.max} years
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+    </Box>
   );
 } 

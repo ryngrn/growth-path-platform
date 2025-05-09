@@ -1,29 +1,32 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 
 const quotes = [
   {
-    text: "The best way to predict the future is to create it.",
-    author: "Abraham Lincoln"
+    text: 'Every child is an artist. The problem is how to remain an artist once we grow up.',
+    author: 'Pablo Picasso',
   },
   {
-    text: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-    author: "Winston Churchill"
+    text: 'Children must be taught how to think, not what to think.',
+    author: 'Margaret Mead',
   },
   {
-    text: "The only way to do great work is to love what you do.",
-    author: "Steve Jobs"
-  }
+    text: 'Play is the highest form of research.',
+    author: 'Albert Einstein',
+  },
 ];
 
 export function RandomQuote() {
-  const [quote] = React.useState(() => 
-    quotes[Math.floor(Math.random() * quotes.length)]
-  );
+  const [quote, setQuote] = useState(quotes[0]);
+
+  useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    setQuote(quotes[randomIndex]);
+  }, []);
 
   return (
-    <blockquote className="border-l-4 border-gray-300 pl-4 italic">
-      <p className="text-lg mb-2">"{quote.text}"</p>
-      <footer className="text-sm text-gray-600">— {quote.author}</footer>
-    </blockquote>
+    <div className="text-center p-4">
+      <p className="text-lg font-medium mb-2">{quote.text}</p>
+      <p className="text-sm text-gray-600">- {quote.author}</p>
+    </div>
   );
 } 
