@@ -6,9 +6,6 @@ if (!process.env.MONGODB_URI) {
 
 const uri = process.env.MONGODB_URI;
 const options = {
-  ssl: true,
-  tls: true,
-  tlsAllowInvalidCertificates: true,
   maxPoolSize: 10,
   minPoolSize: 5,
   maxIdleTimeMS: 60000,

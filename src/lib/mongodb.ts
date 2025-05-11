@@ -29,9 +29,6 @@ export async function connectToDatabase() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      ssl: true,
-      tls: true,
-      tlsAllowInvalidCertificates: true,
       maxPoolSize: 10,
       minPoolSize: 5,
       maxIdleTimeMS: 60000,
