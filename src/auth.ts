@@ -51,31 +51,43 @@ export const {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Email and password are required');
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            console.error('Missing credentials');
+            throw new Error('Email and password are required');
+          }
+
+          await connectToDatabase();
+          console.log('Connected to database');
+
+          const user = await User.findOne({ email: credentials.email });
+          console.log('User lookup result:', user ? 'User found' : 'User not found');
+
+          if (!user) {
+            console.error('No user found with email:', credentials.email);
+            throw new Error('No user found with this email');
+          }
+
+          const isValid = await compare(
+            credentials.password as string,
+            user.password as string
+          );
+          console.log('Password validation result:', isValid ? 'Valid' : 'Invalid');
+
+          if (!isValid) {
+            console.error('Invalid password for user:', credentials.email);
+            throw new Error('Invalid password');
+          }
+
+          return {
+            id: user._id.toString(),
+            email: user.email,
+            name: user.name,
+          };
+        } catch (error) {
+          console.error('Authentication error:', error);
+          throw error;
         }
-
-        await connectToDatabase();
-        const user = await User.findOne({ email: credentials.email });
-
-        if (!user) {
-          throw new Error('No user found with this email');
-        }
-
-        const isValid = await compare(
-          credentials.password as string,
-          user.password as string
-        );
-
-        if (!isValid) {
-          throw new Error('Invalid password');
-        }
-
-        return {
-          id: user._id.toString(),
-          email: user.email,
-          name: user.name,
-        };
       },
     }),
   ],
@@ -94,4 +106,5 @@ export const {
     },
   },
   trustHost: true,
+  debug: process.env.NODE_ENV === 'development',
 }); 
