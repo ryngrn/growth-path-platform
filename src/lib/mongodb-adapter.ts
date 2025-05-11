@@ -14,6 +14,9 @@ const options = {
   serverSelectionTimeoutMS: 10000,
   retryWrites: true,
   retryReads: true,
+  ssl: true,
+  tls: true,
+  tlsAllowInvalidCertificates: process.env.NODE_ENV === 'development',
 };
 
 let client;
@@ -34,7 +37,10 @@ if (process.env.NODE_ENV === 'development') {
 } else {
   // In production mode, it's best to not use a global variable.
   client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+  clientPromise = client.connect().catch((error) => {
+    console.error('MongoDB connection error:', error);
+    throw error;
+  });
 }
 
 // Export a module-scoped MongoClient promise. By doing this in a

@@ -118,9 +118,20 @@ export const authOptions: NextAuthConfig = {
       }
     },
   },
-  debug: process.env.NODE_ENV === 'development',
+  debug: true, // Enable debug mode in production temporarily
   trustHost: true,
   secret: process.env.NEXTAUTH_SECRET,
+  logger: {
+    error(code, metadata) {
+      console.error('NextAuth error:', { code, metadata });
+    },
+    warn(code) {
+      console.warn('NextAuth warning:', code);
+    },
+    debug(code, metadata) {
+      console.debug('NextAuth debug:', { code, metadata });
+    },
+  },
 };
 
 export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth(authOptions); 
