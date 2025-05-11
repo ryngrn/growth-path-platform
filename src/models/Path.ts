@@ -21,6 +21,7 @@ export interface IPath extends Document {
   category: string;
   skills: ISkill[];
   children: mongoose.Types.ObjectId[];
+  isDefault: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -51,8 +52,11 @@ const PathSchema = new Schema<IPath>(
     category: { type: String, required: true },
     skills: [SkillSchema],
     children: [{ type: Schema.Types.ObjectId, ref: 'Child' }],
+    isDefault: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
-export default mongoose.models.Path || mongoose.model<IPath>('Path', PathSchema); 
+const Path = mongoose.models.Path || mongoose.model<IPath>('Path', PathSchema);
+
+export { Path }; 

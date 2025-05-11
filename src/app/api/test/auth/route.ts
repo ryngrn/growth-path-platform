@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/auth';
-import connectDB from '@/lib/mongodb';
-import User from '@/models/User';
-import bcrypt from 'bcryptjs';
+import { auth } from '@/auth';
+import { connectToDatabase } from '@/lib/mongodb';
+import { User } from '@/models/User';
+import { hash } from 'bcryptjs';
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session) {
       return NextResponse.json(
@@ -30,7 +29,7 @@ export async function GET() {
 
 export async function POST() {
   try {
-    await connectDB();
+    await connectToDatabase();
 
     // Check if test user exists
     const testUser = await User.findOne({ email: 'test@example.com' });
@@ -47,10 +46,9 @@ export async function POST() {
     }
 
     // Create test user
-    const hashedPassword = await bcrypt.hash('test123', 10);
+    const hashedPassword = await hash('test123', 10);
     await User.create({
-      firstName: 'Test',
-      familyName: 'User',
+      name: 'Test User',
       email: 'test@example.com',
       password: hashedPassword,
     });
@@ -64,10 +62,9 @@ export async function POST() {
       },
     });
   } catch (error) {
-    console.error('Create test user error:', error);
-    return NextResponse.json({
-      status: 'error',
-      message: 'Failed to create test user',
-    });
+    return NextResponse.json(
+      { error: 'Failed to create test user' },
+      { status: 500 },
+    );
   }
 } 

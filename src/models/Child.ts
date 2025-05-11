@@ -2,9 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IChild extends Document {
   name: string;
-  gender: 'female' | 'male' | 'other';
-  birthday: Date;
-  parent: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
   paths: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
@@ -13,12 +11,12 @@ export interface IChild extends Document {
 const ChildSchema = new Schema<IChild>(
   {
     name: { type: String, required: true },
-    gender: { type: String, enum: ['female', 'male', 'other'] },
-    birthday: { type: Date, required: true },
-    parent: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     paths: [{ type: Schema.Types.ObjectId, ref: 'Path' }],
   },
   { timestamps: true }
 );
 
-export default mongoose.models.Child || mongoose.model<IChild>('Child', ChildSchema); 
+const Child = mongoose.models.Child || mongoose.model<IChild>('Child', ChildSchema);
+
+export { Child }; 
