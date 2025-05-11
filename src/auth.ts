@@ -64,7 +64,10 @@ export const {
           throw new Error('No user found with this email');
         }
 
-        const isValid = await compare(credentials.password, user.password as string);
+        const isValid = await compare(
+          credentials.password as string,
+          user.password as string
+        );
 
         if (!isValid) {
           throw new Error('Invalid password');
