@@ -10,14 +10,14 @@ import type { User as NextAuthUser } from 'next-auth';
 
 declare module 'next-auth' {
   interface User {
-    id?: string;
+    id?: string | null;
     email?: string | null;
     name?: string | null;
   }
 
   interface Session {
     user: {
-      id?: string;
+      id?: string | null;
       email?: string | null;
       name?: string | null;
     };
@@ -26,7 +26,7 @@ declare module 'next-auth' {
 
 declare module 'next-auth/jwt' {
   interface JWT {
-    id?: string;
+    id?: string | null;
     name?: string | null;
     email?: string | null;
   }
@@ -106,10 +106,10 @@ export const authOptions: NextAuthConfig = {
       try {
         if (token) {
           session.user = {
-            id: token.id ?? '',
-            email: token.email ?? null,
-            name: token.name ?? null,
-          } as any;
+            id: token.id || '',
+            email: token.email || null,
+            name: token.name || null,
+          };
         }
         return session;
       } catch (error) {
@@ -119,6 +119,8 @@ export const authOptions: NextAuthConfig = {
     },
   },
   debug: process.env.NODE_ENV === 'development',
+  trustHost: true,
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth(authOptions); 
