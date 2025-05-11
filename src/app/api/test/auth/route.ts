@@ -1,23 +1,30 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 
 export async function GET() {
   try {
-    const session = await auth();
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Not authenticated' },
+        { status: 401 },
+      );
+    }
+
     return NextResponse.json({
-      status: 'success',
-      authenticated: !!session,
-      user: session?.user,
+      authenticated: true,
+      session,
     });
   } catch (error) {
-    console.error('Auth check error:', error);
-    return NextResponse.json({
-      status: 'error',
-      message: 'Failed to check authentication status',
-    });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 },
+    );
   }
 }
 
