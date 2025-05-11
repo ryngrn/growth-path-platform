@@ -1,10 +1,10 @@
 import NextAuth, { type NextAuthConfig } from 'next-auth';
 import { MongoDBAdapter } from '@auth/mongodb-adapter';
-import clientPromise from '@/lib/mongodb';
+import clientPromise from '@/lib/mongodb-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import connectDB from '@/lib/mongodb';
-import User from '@/models/User';
+import User, { IUser } from '@/models/User';
 import type { JWT } from 'next-auth/jwt';
 import type { User as NextAuthUser } from 'next-auth';
 
@@ -33,7 +33,7 @@ declare module 'next-auth/jwt' {
 }
 
 export const authOptions: NextAuthConfig = {
-  adapter: MongoDBAdapter(clientPromise) as any,
+  adapter: MongoDBAdapter(clientPromise),
   session: {
     strategy: 'jwt',
   },
@@ -60,8 +60,8 @@ export const authOptions: NextAuthConfig = {
         }
 
         const isCorrectPassword = await bcrypt.compare(
-          credentials.password,
-          user.password
+          credentials.password as string,
+          user.password as string
         );
 
         if (!isCorrectPassword) {
@@ -79,22 +79,22 @@ export const authOptions: NextAuthConfig = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (trigger === 'update' && session?.user) {
-        token.name = session.user.name;
-        token.email = session.user.email;
+        token.name = session.user.name || null;
+        token.email = session.user.email || null;
       }
       
       if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.name = user.name;
+        token.id = user.id || '';
+        token.email = user.email || null;
+        token.name = user.name || null;
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id;
-        session.user.email = token.email;
-        session.user.name = token.name;
+        session.user.id = token.id || '';
+        session.user.email = token.email || null;
+        session.user.name = token.name || null;
       }
       return session;
     },
