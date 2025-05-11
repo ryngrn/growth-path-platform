@@ -1,26 +1,35 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import connectDB from '@/lib/mongodb';
-import User from '@/models/User';
-import Child from '@/models/Child';
+import { connectToDatabase } from '@/lib/mongodb';
+import { User } from '@/models/User';
+import { Child } from '@/models/Child';
 
 export async function GET() {
   try {
     const session = await auth();
     if (!session?.user?.email) {
-      return NextResponse.json({ status: 'error', message: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
 
-    await connectDB();
-    const user = await User.findOne({ email: session.user.email }).populate('children');
+    await connectToDatabase();
+    const user = await User.findOne({ email: session.user.email });
     if (!user) {
-      return NextResponse.json({ status: 'error', message: 'User not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json({ status: 'success', children: user.children });
+    const children = await Child.find({ userId: user._id });
+    return NextResponse.json(children);
   } catch (error) {
-    console.error('Fetch children error:', error);
-    return NextResponse.json({ status: 'error', message: 'Failed to fetch children' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
@@ -28,35 +37,34 @@ export async function POST(req: Request) {
   try {
     const session = await auth();
     if (!session?.user?.email) {
-      return NextResponse.json({ status: 'error', message: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
 
-    const { name, gender, birthday } = await req.json();
-    if (!name || !birthday) {
-      return NextResponse.json({ status: 'error', message: 'Name and birthday are required' }, { status: 400 });
-    }
+    const body = await req.json();
+    await connectToDatabase();
 
-    await connectDB();
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
-      return NextResponse.json({ status: 'error', message: 'User not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
     }
 
-    const newChild = await Child.create({
-      name,
-      gender: gender || undefined,
-      birthday: new Date(birthday),
-      parent: user._id,
+    const child = await Child.create({
+      ...body,
+      userId: user._id,
     });
 
-    user.children = user.children || [];
-    user.children.push(newChild._id);
-    await user.save();
-
-    return NextResponse.json({ status: 'success', child: newChild });
+    return NextResponse.json(child);
   } catch (error) {
-    console.error('Add child error:', error);
-    return NextResponse.json({ status: 'error', message: 'Failed to add child' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
@@ -72,7 +80,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ status: 'error', message: 'Child ID is required' }, { status: 400 });
     }
 
-    await connectDB();
+    await connectToDatabase();
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
       return NextResponse.json({ status: 'error', message: 'User not found' }, { status: 404 });

@@ -1,10 +1,10 @@
-import NextAuth, { type NextAuthConfig } from 'next-auth';
+import NextAuth from 'next-auth';
 import { MongoDBAdapter } from '@auth/mongodb-adapter';
-import clientPromise from '@/lib/mongodb-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import bcrypt from 'bcryptjs';
-import connectDB from '@/lib/mongodb';
-import User, { IUser } from '@/models/User';
+import { connectToDatabase } from '@/lib/mongodb';
+import { User } from '@/models/User';
+import { compare } from 'bcryptjs';
+import clientPromise from '@/lib/mongodb-adapter';
 import type { JWT } from 'next-auth/jwt';
 import type { User as NextAuthUser } from 'next-auth';
 
@@ -32,106 +32,64 @@ declare module 'next-auth/jwt' {
   }
 }
 
-export const authOptions: NextAuthConfig = {
+export const {
+  handlers: { GET, POST },
+  auth,
+  signIn,
+  signOut,
+} = NextAuth({
   adapter: MongoDBAdapter(clientPromise),
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
-    signIn: '/',
-    error: '/auth/error',
+    signIn: '/login',
   },
   providers: [
     CredentialsProvider({
-      name: 'credentials',
+      name: 'Credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        try {
-          if (!credentials?.email || !credentials?.password) {
-            throw new Error('Invalid credentials');
-          }
-
-          await connectDB();
-          const user = await User.findOne({ email: credentials.email });
-
-          if (!user || !user?.password) {
-            throw new Error('Invalid credentials');
-          }
-
-          const isCorrectPassword = await bcrypt.compare(
-            credentials.password as string,
-            user.password as string
-          );
-
-          if (!isCorrectPassword) {
-            throw new Error('Invalid credentials');
-          }
-
-          return {
-            id: user._id.toString(),
-            email: user.email,
-            name: user.firstName,
-          };
-        } catch (error) {
-          console.error('Auth error:', error);
-          throw error;
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Email and password are required');
         }
+
+        await connectToDatabase();
+        const user = await User.findOne({ email: credentials.email });
+
+        if (!user) {
+          throw new Error('No user found with this email');
+        }
+
+        const isValid = await compare(credentials.password, user.password as string);
+
+        if (!isValid) {
+          throw new Error('Invalid password');
+        }
+
+        return {
+          id: user._id.toString(),
+          email: user.email,
+          name: user.name,
+        };
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
-      try {
-        if (trigger === 'update' && session?.user) {
-          token.name = session.user.name;
-          token.email = session.user.email;
-        }
-        
-        if (user) {
-          token.id = user.id;
-          token.email = user.email;
-          token.name = user.name;
-        }
-        return token;
-      } catch (error) {
-        console.error('JWT callback error:', error);
-        throw error;
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
       }
+      return token;
     },
     async session({ session, token }) {
-      try {
-        if (token) {
-          session.user = {
-            id: token.id || '',
-            email: token.email || '',
-            name: token.name || '',
-          } as any;
-        }
-        return session;
-      } catch (error) {
-        console.error('Session callback error:', error);
-        throw error;
+      if (session.user) {
+        session.user.id = token.id as string;
       }
+      return session;
     },
   },
-  debug: true, // Enable debug mode in production temporarily
-  trustHost: true,
-  secret: process.env.NEXTAUTH_SECRET,
-  logger: {
-    error(error: Error) {
-      console.error('NextAuth error:', error);
-    },
-    warn(message: string) {
-      console.warn('NextAuth warning:', message);
-    },
-    debug(message: string, metadata?: unknown) {
-      console.debug('NextAuth debug:', { message, metadata });
-    },
-  },
-};
-
-export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth(authOptions); 
+}); 
