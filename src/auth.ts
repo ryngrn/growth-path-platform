@@ -1,14 +1,18 @@
-import NextAuth from 'next-auth';
+import NextAuth, { type NextAuthConfig } from 'next-auth';
+import { MongoDBAdapter } from '@auth/mongodb-adapter';
+import clientPromise from '@/lib/mongodb';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import bcrypt from 'bcryptjs';
+import connectDB from '@/lib/mongodb';
+import User from '@/models/User';
 import type { JWT } from 'next-auth/jwt';
-import type { Session } from 'next-auth';
-import { authOptions } from './app/utils/authOptions';
+import type { User as NextAuthUser } from 'next-auth';
 
 declare module 'next-auth' {
   interface User {
     id?: string;
     email?: string | null;
     name?: string | null;
-    familyName?: string;
   }
 
   interface Session {
@@ -16,7 +20,6 @@ declare module 'next-auth' {
       id?: string;
       email?: string | null;
       name?: string | null;
-      familyName?: string;
     };
   }
 }
@@ -24,8 +27,78 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT {
     id?: string;
-    familyName?: string;
+    name?: string | null;
+    email?: string | null;
   }
 }
 
-export const { auth, signIn, signOut } = NextAuth(authOptions); 
+export const authOptions: NextAuthConfig = {
+  adapter: MongoDBAdapter(clientPromise) as any,
+  session: {
+    strategy: 'jwt',
+  },
+  pages: {
+    signIn: '/',
+  },
+  providers: [
+    CredentialsProvider({
+      name: 'credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Invalid credentials');
+        }
+
+        await connectDB();
+        const user = await User.findOne({ email: credentials.email });
+
+        if (!user || !user?.password) {
+          throw new Error('Invalid credentials');
+        }
+
+        const isCorrectPassword = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
+
+        if (!isCorrectPassword) {
+          throw new Error('Invalid credentials');
+        }
+
+        return {
+          id: user._id.toString(),
+          email: user.email,
+          name: user.firstName,
+        };
+      },
+    }),
+  ],
+  callbacks: {
+    async jwt({ token, user, trigger, session }) {
+      if (trigger === 'update' && session?.user) {
+        token.name = session.user.name;
+        token.email = session.user.email;
+      }
+      
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id;
+        session.user.email = token.email;
+        session.user.name = token.name;
+      }
+      return session;
+    },
+  },
+};
+
+export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth(authOptions); 

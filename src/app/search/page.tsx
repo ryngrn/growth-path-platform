@@ -83,63 +83,66 @@ export default function Search() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="font-roca text-3xl">Find Paths</h1>
-          <Link href="/dashboard" className="btn-secondary">
-            Back to Dashboard
-          </Link>
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-2xl font-semibold text-[#141313]">Discover Learning Paths</h1>
+          </div>
 
-        <div className="mb-6">
-          <input
-            type="text"
-            className="input mb-4 text-black"
-            placeholder="Search paths..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                className={`px-4 py-2 rounded-full whitespace-nowrap ${
-                  selectedCategory === category.id
-                    ? 'bg-primary-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-                onClick={() => setSelectedCategory(category.id)}
-              >
-                {category.name}
-              </button>
+          <div className="mb-6">
+            <input
+              type="text"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef5e2f] focus:border-transparent text-gray-900 mb-4"
+              placeholder="Search paths..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
+                    selectedCategory === category.id
+                      ? 'bg-[#ef5e2f] text-white'
+                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedCategory(category.id)}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {filteredPaths.map((path) => (
+              <div key={path.id} className="bg-white rounded-xl shadow-md p-6">
+                <h2 className="text-xl font-semibold text-[#141313] mb-2">{path.name}</h2>
+                <p className="text-gray-600 mb-4">{path.description}</p>
+                <div className="space-y-4">
+                  {path.skills.map((skill) => (
+                    <div key={skill.id} className="p-4 border border-gray-200 rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h3 className="font-medium text-[#141313]">{skill.name}</h3>
+                          <p className="text-sm text-gray-600">{skill.description}</p>
+                        </div>
+                        <span className="text-sm text-gray-500">
+                          Ages {skill.ageRange.min}-{skill.ageRange.max}
+                        </span>
+                      </div>
+                      <button 
+                        className="w-full px-4 py-2 bg-[#ef5e2f] text-white rounded-full hover:bg-[#d44d1f] transition-colors"
+                      >
+                        Add to Child's Path
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
-        </div>
-
-        <div className="space-y-6">
-          {filteredPaths.map((path) => (
-            <div key={path.id} className="card">
-              <h2 className="font-roca text-2xl mb-2">{path.name}</h2>
-              <p className="text-gray-600 mb-4">{path.description}</p>
-              <div className="space-y-4">
-                {path.skills.map((skill) => (
-                  <div key={skill.id} className="p-4 border rounded-lg">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-medium">{skill.name}</h3>
-                        <p className="text-sm text-gray-600">{skill.description}</p>
-                      </div>
-                      <span className="text-sm text-gray-500">
-                        Ages {skill.ageRange.min}-{skill.ageRange.max}
-                      </span>
-                    </div>
-                    <button className="btn-primary w-full">Add to Child's Path</button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>

@@ -7,7 +7,7 @@ import Child from '@/models/Child';
 export async function GET() {
   try {
     const session = await auth();
-    if (!session || !session.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json({ status: 'error', message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -27,7 +27,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const session = await auth();
-    if (!session || !session.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json({ status: 'error', message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const session = await auth();
-    if (!session || !session.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json({ status: 'error', message: 'Unauthorized' }, { status: 401 });
     }
 

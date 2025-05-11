@@ -1,30 +1,33 @@
-import { Metadata } from 'next/types';
+import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import './globals.css';
 import { Providers } from '@/components/providers';
+import '@/styles/globals.css';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import type { ReactNode } from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'GrowthPath',
-  description: 'Personalized learning paths for children',
+  description: 'Track your child\'s growth and development',
 };
 
 export default function RootLayout({
   children,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.className} min-h-screen bg-gray-50`}>
         <Providers>
-          <Header />
-          {children}
-          <Footer />
+          <main className="flex min-h-screen flex-col">
+            <Header />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+          </main>
         </Providers>
       </body>
     </html>
