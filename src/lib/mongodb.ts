@@ -32,19 +32,30 @@ async function connectDB(): Promise<typeof mongoose> {
   if (!globalMongoose.promise) {
     const opts = {
       bufferCommands: false,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      tlsAllowInvalidHostnames: true,
+      maxPoolSize: 10,
+      minPoolSize: 5,
+      maxIdleTimeMS: 60000,
+      connectTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      serverSelectionTimeoutMS: 10000,
       retryWrites: true,
-      w: 1,
+      retryReads: true,
+      ssl: true,
+      tls: true,
+      tlsAllowInvalidCertificates: process.env.NODE_ENV === 'development',
     };
 
-    globalMongoose.promise = mongoose.connect(MONGODB_URI, opts);
+    globalMongoose.promise = mongoose.connect(MONGODB_URI, opts).catch((error) => {
+      console.error('MongoDB connection error:', error);
+      throw error;
+    });
   }
 
   try {
     globalMongoose.conn = await globalMongoose.promise;
+    console.log('MongoDB connected successfully');
   } catch (e) {
+    console.error('MongoDB connection error:', e);
     globalMongoose.promise = null;
     throw e;
   }
