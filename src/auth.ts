@@ -107,9 +107,9 @@ export const authOptions: NextAuthConfig = {
         if (token) {
           session.user = {
             id: token.id || '',
-            email: token.email || null,
-            name: token.name || null,
-          };
+            email: token.email || '',
+            name: token.name || '',
+          } as any;
         }
         return session;
       } catch (error) {
@@ -122,14 +122,14 @@ export const authOptions: NextAuthConfig = {
   trustHost: true,
   secret: process.env.NEXTAUTH_SECRET,
   logger: {
-    error(code, metadata) {
-      console.error('NextAuth error:', { code, metadata });
+    error(error: Error) {
+      console.error('NextAuth error:', error);
     },
-    warn(code) {
-      console.warn('NextAuth warning:', code);
+    warn(message: string) {
+      console.warn('NextAuth warning:', message);
     },
-    debug(code, metadata) {
-      console.debug('NextAuth debug:', { code, metadata });
+    debug(message: string, metadata?: unknown) {
+      console.debug('NextAuth debug:', { message, metadata });
     },
   },
 };
