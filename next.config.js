@@ -7,7 +7,7 @@ const nextConfig = {
   },
   output: 'standalone',
   images: {
-    domains: ['localhost', 'growthpath.app'],
+    domains: ['localhost', 'growthpath.app', 'images.unsplash.com'],
     unoptimized: true,
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
@@ -23,6 +23,7 @@ const nextConfig = {
       ...config.resolve.alias,
       '@': require('path').resolve(__dirname, 'src'),
     };
+    config.externals = [...(config.externals || []), { 'tailwind-merge': 'tailwind-merge' }];
     return config;
   }
 }
