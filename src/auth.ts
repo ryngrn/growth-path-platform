@@ -79,22 +79,24 @@ export const authOptions: NextAuthConfig = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (trigger === 'update' && session?.user) {
-        token.name = session.user.name || null;
-        token.email = session.user.email || null;
+        token.name = session.user.name;
+        token.email = session.user.email;
       }
       
       if (user) {
-        token.id = user.id || '';
-        token.email = user.email || null;
-        token.name = user.name || null;
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id || '';
-        session.user.email = token.email || null;
-        session.user.name = token.name || null;
+        session.user = {
+          id: token.id ?? '',
+          email: token.email ?? null,
+          name: token.name ?? null,
+        } as any;
       }
       return session;
     },
