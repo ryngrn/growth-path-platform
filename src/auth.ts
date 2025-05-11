@@ -5,8 +5,6 @@ import { connectToDatabase } from '@/lib/mongodb';
 import { User } from '@/models/User';
 import { compare } from 'bcryptjs';
 import clientPromise from '@/lib/mongodb-adapter';
-import type { JWT } from 'next-auth/jwt';
-import type { User as NextAuthUser } from 'next-auth';
 
 declare module 'next-auth' {
   interface User {

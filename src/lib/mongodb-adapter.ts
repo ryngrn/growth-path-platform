@@ -9,8 +9,6 @@ const options = {
   ssl: true,
   tls: true,
   tlsAllowInvalidCertificates: true,
-  tlsAllowInvalidHostnames: true,
-  tlsInsecure: true,
   maxPoolSize: 10,
   minPoolSize: 5,
   maxIdleTimeMS: 60000,
