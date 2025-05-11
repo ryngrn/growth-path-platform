@@ -36,9 +36,11 @@ export const authOptions: NextAuthConfig = {
   adapter: MongoDBAdapter(clientPromise),
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
     signIn: '/',
+    error: '/auth/error',
   },
   providers: [
     CredentialsProvider({
@@ -48,59 +50,75 @@ export const authOptions: NextAuthConfig = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Invalid credentials');
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error('Invalid credentials');
+          }
+
+          await connectDB();
+          const user = await User.findOne({ email: credentials.email });
+
+          if (!user || !user?.password) {
+            throw new Error('Invalid credentials');
+          }
+
+          const isCorrectPassword = await bcrypt.compare(
+            credentials.password as string,
+            user.password as string
+          );
+
+          if (!isCorrectPassword) {
+            throw new Error('Invalid credentials');
+          }
+
+          return {
+            id: user._id.toString(),
+            email: user.email,
+            name: user.firstName,
+          };
+        } catch (error) {
+          console.error('Auth error:', error);
+          throw error;
         }
-
-        await connectDB();
-        const user = await User.findOne({ email: credentials.email });
-
-        if (!user || !user?.password) {
-          throw new Error('Invalid credentials');
-        }
-
-        const isCorrectPassword = await bcrypt.compare(
-          credentials.password as string,
-          user.password as string
-        );
-
-        if (!isCorrectPassword) {
-          throw new Error('Invalid credentials');
-        }
-
-        return {
-          id: user._id.toString(),
-          email: user.email,
-          name: user.firstName,
-        };
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user, trigger, session }) {
-      if (trigger === 'update' && session?.user) {
-        token.name = session.user.name;
-        token.email = session.user.email;
+      try {
+        if (trigger === 'update' && session?.user) {
+          token.name = session.user.name;
+          token.email = session.user.email;
+        }
+        
+        if (user) {
+          token.id = user.id;
+          token.email = user.email;
+          token.name = user.name;
+        }
+        return token;
+      } catch (error) {
+        console.error('JWT callback error:', error);
+        throw error;
       }
-      
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.name = user.name;
-      }
-      return token;
     },
     async session({ session, token }) {
-      if (token) {
-        session.user = {
-          id: token.id ?? '',
-          email: token.email ?? null,
-          name: token.name ?? null,
-        } as any;
+      try {
+        if (token) {
+          session.user = {
+            id: token.id ?? '',
+            email: token.email ?? null,
+            name: token.name ?? null,
+          } as any;
+        }
+        return session;
+      } catch (error) {
+        console.error('Session callback error:', error);
+        throw error;
       }
-      return session;
     },
   },
+  debug: process.env.NODE_ENV === 'development',
 };
 
 export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth(authOptions); 
