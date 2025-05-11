@@ -31,15 +31,19 @@ export async function connectToDatabase() {
       bufferCommands: false,
       ssl: true,
       tls: true,
-      tlsAllowInvalidCertificates: false,
-      tlsAllowInvalidHostnames: false,
-      tlsInsecure: false,
+      tlsAllowInvalidCertificates: true,
+      tlsAllowInvalidHostnames: true,
+      tlsInsecure: true,
       maxPoolSize: 10,
       minPoolSize: 5,
       maxIdleTimeMS: 60000,
-      connectTimeoutMS: 10000,
+      connectTimeoutMS: 30000,
       socketTimeoutMS: 45000,
       family: 4,
+      retryWrites: true,
+      retryReads: true,
+      serverSelectionTimeoutMS: 30000,
+      heartbeatFrequencyMS: 10000,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {

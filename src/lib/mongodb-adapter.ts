@@ -6,20 +6,24 @@ if (!process.env.MONGODB_URI) {
 
 const uri = process.env.MONGODB_URI;
 const options = {
+  ssl: true,
+  tls: true,
+  tlsAllowInvalidCertificates: true,
+  tlsAllowInvalidHostnames: true,
+  tlsInsecure: true,
   maxPoolSize: 10,
   minPoolSize: 5,
   maxIdleTimeMS: 60000,
-  connectTimeoutMS: 10000,
+  connectTimeoutMS: 30000,
   socketTimeoutMS: 45000,
-  serverSelectionTimeoutMS: 10000,
+  family: 4,
   retryWrites: true,
   retryReads: true,
-  ssl: true,
-  tls: true,
-  tlsAllowInvalidCertificates: process.env.NODE_ENV === 'development',
+  serverSelectionTimeoutMS: 30000,
+  heartbeatFrequencyMS: 10000,
 };
 
-let client;
+let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
 if (process.env.NODE_ENV === 'development') {
@@ -37,10 +41,7 @@ if (process.env.NODE_ENV === 'development') {
 } else {
   // In production mode, it's best to not use a global variable.
   client = new MongoClient(uri, options);
-  clientPromise = client.connect().catch((error) => {
-    console.error('MongoDB connection error:', error);
-    throw error;
-  });
+  clientPromise = client.connect();
 }
 
 // Export a module-scoped MongoClient promise. By doing this in a
