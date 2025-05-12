@@ -39,9 +39,11 @@ export const {
   adapter: MongoDBAdapter(clientPromise),
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
     signIn: '/login',
+    error: '/login',
   },
   providers: [
     CredentialsProvider({
@@ -54,29 +56,47 @@ export const {
         try {
           if (!credentials?.email || !credentials?.password) {
             console.error('Missing credentials');
-            throw new Error('Email and password are required');
+            return null;
           }
 
-          await connectToDatabase();
-          console.log('Connected to database');
+          let db;
+          try {
+            db = await connectToDatabase();
+            console.log('Connected to database successfully');
+          } catch (dbError) {
+            console.error('Database connection error:', dbError);
+            throw new Error('Unable to connect to database');
+          }
 
-          const user = await User.findOne({ email: credentials.email });
-          console.log('User lookup result:', user ? 'User found' : 'User not found');
+          let user;
+          try {
+            user = await User.findOne({ email: credentials.email.toLowerCase() });
+            console.log('User lookup result:', user ? 'User found' : 'User not found');
+          } catch (userError) {
+            console.error('User lookup error:', userError);
+            throw new Error('Error looking up user');
+          }
 
           if (!user) {
             console.error('No user found with email:', credentials.email);
-            throw new Error('No user found with this email');
+            return null;
           }
 
-          const isValid = await compare(
-            credentials.password as string,
-            user.password as string
-          );
-          console.log('Password validation result:', isValid ? 'Valid' : 'Invalid');
+          let isValid;
+          try {
+            isValid = await compare(
+              credentials.password as string,
+              user.password as string
+            );
+            console.log('Password validation result:', isValid ? 'Valid' : 'Invalid');
+          } catch (compareError) {
+            console.error('Password comparison error:', compareError);
+            throw new Error('Error validating password');
+          }
 
           if (!isValid) {
             console.error('Invalid password for user:', credentials.email);
-            throw new Error('Invalid password');
+            return null;
           }
 
           return {
@@ -95,16 +115,31 @@ export const {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
+        session.user.email = token.email;
+        session.user.name = token.name;
       }
       return session;
     },
   },
   trustHost: true,
-  debug: process.env.NODE_ENV === 'development',
+  debug: true,
+  logger: {
+    error(error: Error) {
+      console.error('NextAuth error:', error);
+    },
+    warn(message: string) {
+      console.warn('NextAuth warning:', message);
+    },
+    debug(message: string, metadata?: unknown) {
+      console.log('NextAuth debug:', message, metadata);
+    },
+  },
 }); 
