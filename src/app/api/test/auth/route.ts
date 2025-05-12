@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getServerSession } from 'next-auth';
+import { authConfig } from '@/auth';
 import { connectToDatabase } from '@/lib/server/mongodb';
 import { User } from '@/models/User';
 import { hash } from 'bcryptjs';
 
 export async function GET() {
   try {
-    const session = await auth();
+    const session = await getServerSession(authConfig) as any;
 
     if (!session) {
       return NextResponse.json(

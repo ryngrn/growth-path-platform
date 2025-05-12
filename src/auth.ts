@@ -5,7 +5,7 @@ import { User as UserModel } from '@/models/User';
 import { compare } from 'bcryptjs';
 import clientPromise from '@/lib/server/mongodb-adapter';
 import { ObjectId } from 'mongodb';
-import { MongoDBAdapter } from '@auth/mongodb-adapter';
+import { MongoDBAdapter } from '@next-auth/mongodb-adapter';
 
 // Define types for next-auth
 interface User {
@@ -56,17 +56,7 @@ declare module 'next-auth' {
   }
 }
 
-declare module 'next-auth/jwt' {
-  interface JWT {
-    id?: string | null;
-    name?: string | null;
-    email?: string | null;
-    emailVerified?: Date | null;
-    image?: string | null;
-  }
-}
-
-export const auth = NextAuth({
+export const authConfig = {
   adapter: MongoDBAdapter(clientPromise),
   session: {
     strategy: 'jwt' as const,
@@ -119,7 +109,7 @@ export const auth = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: any) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -129,7 +119,7 @@ export const auth = NextAuth({
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       if (session.user) {
         session.user = {
           id: token.id as string || '',
@@ -147,7 +137,7 @@ export const auth = NextAuth({
       name: '__Secure-next-auth.session-token',
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'lax' as const,
         path: '/',
         secure: true,
       },
@@ -156,7 +146,7 @@ export const auth = NextAuth({
       name: '__Secure-next-auth.callback-url',
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'lax' as const,
         path: '/',
         secure: true,
       },
@@ -165,7 +155,7 @@ export const auth = NextAuth({
       name: '__Host-next-auth.csrf-token',
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'lax' as const,
         path: '/',
         secure: true,
       },
@@ -175,23 +165,20 @@ export const auth = NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
   logger: {
-    error(error: Error) {
-      console.error('NextAuth error:', error);
-    },
-    warn(message: string) {
+    error(code: string, metadata: Error | { [key: string]: unknown; error: Error }) {
       if (process.env.NODE_ENV === 'development') {
-        console.log('NextAuth debug:', message);
+        console.error('NextAuth error:', code, metadata);
       }
     },
-    debug(message: string, metadata?: unknown) {
+    warn(code: string) {
       if (process.env.NODE_ENV === 'development') {
-        console.log('NextAuth debug:', message, metadata);
+        console.warn('NextAuth warn:', code);
+      }
+    },
+    debug(code: string, metadata?: unknown) {
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('NextAuth debug:', code, metadata);
       }
     },
   },
-});
-
-export const { signIn, signOut } = NextAuth(auth);
-
-// Export auth function for use in API routes
-export { NextAuth as getServerSession };
+};

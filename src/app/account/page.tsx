@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Box, Typography, Button, TextField, CircularProgress } from '@mui/material';
-import { updateUserProfile } from '@/app/api/user/route';
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
@@ -36,7 +35,13 @@ export default function AccountPage() {
     setSuccess('');
 
     try {
-      const response = await updateUserProfile(formData);
+      const response = await fetch('/api/user', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
       if (response.ok) {
         setSuccess('Profile updated successfully');
       } else {

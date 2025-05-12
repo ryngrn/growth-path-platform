@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getServerSession } from 'next-auth/next';
+import { authConfig } from '@/auth';
 import { connectToDatabase } from '@/lib/server/mongodb';
 import { User } from '@/models/User';
 import { Child } from '@/models/Child';
 
 export async function GET() {
   try {
-    const session = await auth();
+    const session = await getServerSession(authConfig) as any;
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Not authenticated' },
@@ -35,7 +36,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const session = await auth();
+    const session = await getServerSession(authConfig) as any;
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Not authenticated' },
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const session = await auth();
+    const session = await getServerSession(authConfig) as any;
     if (!session?.user?.id) {
       return NextResponse.json({ status: 'error', message: 'Unauthorized' }, { status: 401 });
     }
@@ -90,7 +91,7 @@ export async function DELETE(req: Request) {
     }
 
     // Remove child from user's children array
-    user.children = user.children.filter((id: string) => id.toString() !== childId);
+    (user as any).children = (user as any).children.filter((id: string) => id.toString() !== childId);
     await user.save();
 
     // Delete the child document
