@@ -40,6 +40,7 @@ const nextConfig = {
         assert: false,
         constants: false,
         'mongodb-oidc': false,
+        aws4: false,
       };
     }
     config.resolve.alias = {

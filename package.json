@@ -16,6 +16,7 @@
     "@lottiefiles/react-lottie-player": "^3.6.0",
     "@mui/icons-material": "^7.1.0",
     "@mui/material": "^7.1.0",
+    "aws4": "^1.13.2",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.0",
     "mongodb": "^6.3.0",
