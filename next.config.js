@@ -26,6 +26,20 @@ const nextConfig = {
         dns: false,
         child_process: false,
         'mongodb-client-encryption': false,
+        'timers/promises': false,
+        crypto: false,
+        stream: false,
+        http: false,
+        https: false,
+        zlib: false,
+        path: false,
+        os: false,
+        util: false,
+        buffer: false,
+        url: false,
+        assert: false,
+        constants: false,
+        'mongodb-oidc': false,
       };
     }
     config.resolve.alias = {
