@@ -11,6 +11,7 @@ declare module 'next-auth' {
     id?: string | null;
     email?: string | null;
     name?: string | null;
+    emailVerified?: Date | null;
   }
 
   interface Session {
@@ -18,6 +19,7 @@ declare module 'next-auth' {
       id?: string | null;
       email?: string | null;
       name?: string | null;
+      emailVerified?: Date | null;
     };
   }
 }
@@ -27,6 +29,7 @@ declare module 'next-auth/jwt' {
     id?: string | null;
     name?: string | null;
     email?: string | null;
+    emailVerified?: Date | null;
   }
 }
 
@@ -103,6 +106,7 @@ export const {
             id: user._id.toString(),
             email: user.email,
             name: user.name,
+            emailVerified: user.emailVerified,
           };
         } catch (error) {
           console.error('Authentication error:', error);
@@ -117,6 +121,7 @@ export const {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
+        token.emailVerified = user.emailVerified;
       }
       return token;
     },
@@ -126,6 +131,7 @@ export const {
           id: token.id || '',
           email: token.email || '',
           name: token.name || '',
+          emailVerified: token.emailVerified || null,
         };
       }
       return session;
