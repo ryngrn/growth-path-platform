@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
-import { connectToDatabase } from '@/lib/mongodb';
+import { connectToDatabase } from '@/lib/server/mongodb';
 import { Child } from '@/models/Child';
 
 export async function GET(
