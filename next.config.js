@@ -20,39 +20,50 @@ const nextConfig = {
       // Don't attempt to load these modules on the client side
       config.resolve.fallback = {
         ...config.resolve.fallback,
-        net: false,
-        tls: false,
-        fs: false,
-        dns: false,
-        child_process: false,
-        'mongodb-client-encryption': false,
-        'timers/promises': false,
-        crypto: false,
-        stream: false,
-        http: false,
-        https: false,
-        zlib: false,
-        path: false,
-        os: false,
-        util: false,
-        buffer: false,
-        url: false,
-        assert: false,
-        constants: false,
-        'mongodb-oidc': false,
-        aws4: false,
-        socks: false,
-        'mongodb': false,
-        '@auth/mongodb-adapter': false,
+        net: 'empty',
+        tls: 'empty',
+        fs: 'empty',
+        dns: 'empty',
+        child_process: 'empty',
+        crypto: 'empty',
+        stream: 'empty',
+        http: 'empty',
+        https: 'empty',
+        zlib: 'empty',
+        path: 'empty',
+        os: 'empty',
+        util: 'empty',
+        buffer: 'empty',
+        url: 'empty',
+        assert: 'empty',
+        constants: 'empty',
+        timers: 'empty',
+        'mongodb-client-encryption': 'empty',
+        'mongodb-oidc': 'empty',
       };
+      
+      // Add rules to ignore MongoDB client-side encryption modules
+      config.module.rules.push(
+        {
+          test: /mongodb-client-encryption|mongodb-oidc/,
+          use: 'null-loader',
+        }
+      );
     }
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': require('path').resolve(__dirname, 'src'),
     };
-    config.externals = [...(config.externals || []), { 'tailwind-merge': 'tailwind-merge' }];
+    config.externals = [
+      ...(config.externals || []),
+      { 'tailwind-merge': 'tailwind-merge' },
+      {
+        'mongodb': 'commonjs mongodb',
+        '@auth/mongodb-adapter': 'commonjs @auth/mongodb-adapter',
+      },
+    ];
     return config;
-  }
-}
+  },
+};
 
-module.exports = nextConfig 
+module.exports = nextConfig

@@ -6,13 +6,17 @@ if (!process.env.MONGODB_URI) {
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-let cached = global.mongoose;
+let cached = (global as any).mongoose;
 
 if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+  cached = {
+    conn: null,
+    promise: null,
+  };
+  (global as any).mongoose = cached;
 }
 
-export async function connectToDatabase() {
+export async function connectToDatabase(): Promise<typeof mongoose> {
   if (cached.conn) {
     return cached.conn;
   }
@@ -22,9 +26,7 @@ export async function connectToDatabase() {
       bufferCommands: false,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      return mongoose;
-    });
+    cached.promise = mongoose.connect(MONGODB_URI, opts);
   }
 
   try {

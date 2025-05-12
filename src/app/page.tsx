@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Box, Button, Container, TextField, Typography, Alert, CircularProgress } from '@mui/material';
-import type { FormEvent, ChangeEvent } from 'react';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -50,10 +53,13 @@ export default function LoginPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
+    setIsLoading(true);
 
-    if (isRegistering) {
-      try {
-        setIsLoading(true);
+    try {
+      await handleSignIn();
+
+      // If we're registering, create the user
+      if (isRegistering) {
         const response = await fetch('/api/auth/register', {
           method: 'POST',
           headers: {
@@ -62,21 +68,14 @@ export default function LoginPage() {
           body: JSON.stringify(formData),
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-          throw new Error(data.message || 'Registration failed');
+          throw new Error('Failed to create user');
         }
-
-        // After successful registration, sign in
-        await handleSignIn();
-      } catch (err) {
-        setErrorMessage(err instanceof Error ? err.message : 'Registration failed');
-      } finally {
-        setIsLoading(false);
       }
-    } else {
-      await handleSignIn();
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -91,18 +90,9 @@ export default function LoginPage() {
   // Show loading state only during initial session check
   if (status === 'loading') {
     return (
-      <Container component="main" maxWidth="xs">
-        <Box
-          sx={{
-            marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      </Container>
+      <div className="mt-2 w-full flex flex-col items-center">
+        <CircularProgress />
+      </div>
     );
   }
 
@@ -112,15 +102,8 @@ export default function LoginPage() {
   }
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
+    <div className="w-full max-w-sm mx-auto">
+      <div className="mt-8 flex flex-col items-center">
         <Box sx={{ mb: '100px' }}>
           <img src="/images/logo-light.png" alt="Logo" style={{ transform: 'scale(0.6)' }} />
         </Box>
@@ -205,9 +188,7 @@ export default function LoginPage() {
           >
             {isLoading ? (
               <CircularProgress size={24} color="inherit" />
-            ) : (
-              isRegistering ? 'Register' : 'Sign In'
-            )}
+            ) : isRegistering ? 'Register' : 'Sign In'}
           </Button>
 
           <Button
@@ -222,7 +203,7 @@ export default function LoginPage() {
             {isRegistering ? 'Already have an account? Sign in' : 'Need an account? Register'}
           </Button>
         </Box>
-      </Box>
-    </Container>
+      </div>
+    </div>
   );
 }

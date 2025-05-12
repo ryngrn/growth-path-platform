@@ -5,8 +5,10 @@ import { connectToDatabase } from '@/lib/server/mongodb';
 import { User } from '@/models/User';
 import { compare } from 'bcryptjs';
 import clientPromise from '@/lib/server/mongodb-adapter';
-import type { JWT } from 'next-auth/jwt';
-import type { Session } from 'next-auth';
+import { ObjectId } from 'mongodb';
+import type { NextAuthOptions } from 'next-auth';
+import { Session, User as NextAuthUser } from 'next-auth';
+import { JWT } from 'next-auth/jwt';
 
 // Add server-side only check
 if (typeof window !== 'undefined') {
@@ -83,12 +85,11 @@ export const authOptions: NextAuthConfig = {
           }
 
           return {
-            id: user._id.toString(),
-            email: user.email,
-            name: user.name,
-            emailVerified: user.emailVerified,
-            image: user.image,
-          };
+            ...user,
+            id: (user._id as ObjectId).toString(),
+            emailVerified: user.emailVerified ? new Date(user.emailVerified) : null,
+            email: user.email || null,
+          } as NextAuthUser;
         } catch (error) {
           console.error('Authentication error:', error);
           throw error;
@@ -157,7 +158,9 @@ export const authOptions: NextAuthConfig = {
       console.error('NextAuth error:', error);
     },
     warn(message: string) {
-      console.warn('NextAuth warning:', message);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('NextAuth debug:', message);
+      }
     },
     debug(message: string, metadata?: unknown) {
       if (process.env.NODE_ENV === 'development') {

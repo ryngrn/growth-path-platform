@@ -36,6 +36,7 @@
         "max-lines": "off",
         "max-lines-per-function": "off",
         "no-magic-numbers": "off",
-        "no-underscore-dangle": "off"
+        "no-underscore-dangle": "off",
+        "no-invalid-this": "off"
     }
 }
