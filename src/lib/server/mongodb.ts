@@ -1,10 +1,5 @@
 import mongoose from 'mongoose';
 
-// Add server-side only check
-if (typeof window !== 'undefined') {
-  throw new Error('This module can only be used on the server side');
-}
-
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
