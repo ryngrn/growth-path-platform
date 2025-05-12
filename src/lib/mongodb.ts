@@ -50,29 +50,9 @@ export async function connectToDatabase() {
 
     cached.promise = mongoose.connect(MONGODB_URI, opts)
       .then((mongoose) => {
-        console.log('MongoDB connected successfully');
-        // Add connection event listeners
-        mongoose.connection.on('error', (err) => {
-          console.error('MongoDB connection error:', err);
-        });
-        mongoose.connection.on('disconnected', () => {
-          console.warn('MongoDB disconnected');
-        });
-        mongoose.connection.on('reconnected', () => {
-          console.log('MongoDB reconnected');
-        });
         return mongoose;
       })
       .catch((error) => {
-        console.error('MongoDB connection error:', error);
-        // Log specific error details
-        if (error.name === 'MongoServerSelectionError') {
-          console.error('Server selection error details:', {
-            message: error.message,
-            reason: error.reason,
-            topology: error.topology?.description,
-          });
-        }
         cached.promise = null;
         throw error;
       });
