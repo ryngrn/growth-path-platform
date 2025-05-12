@@ -11,9 +11,16 @@ NPM_FLAGS = "--legacy-peer-deps"
 package = "@netlify/plugin-nextjs"
 
 [[redirects]]
+from = "/api/*"
+to = "/.netlify/functions/next"
+status = 200
+force = true
+
+[[redirects]]
 from = "/*"
 to = "/.netlify/functions/next"
 status = 200
+force = true
 
 [functions]
 node_bundler = "esbuild"

@@ -7,11 +7,10 @@ const nextConfig = {
   },
   output: 'standalone',
   images: {
-    domains: ['localhost', 'growthpath.app', 'images.unsplash.com'],
-    unoptimized: true,
-    dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    domains: ['images.unsplash.com'],
+  },
+  experimental: {
+    serverActions: true,
   },
   env: {
     MONGODB_URI: process.env.MONGODB_URI,
