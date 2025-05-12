@@ -4,14 +4,20 @@ publish = ".next"
 
 [build.environment]
 NEXT_TELEMETRY_DISABLED = "1"
-NODE_VERSION = "20"
+NODE_VERSION = "18"
 NPM_FLAGS = "--legacy-peer-deps"
 
 [[plugins]]
 package = "@netlify/plugin-nextjs"
 
+[[redirects]]
+from = "/*"
+to = "/.netlify/functions/next"
+status = 200
+
 [functions]
-directory = "netlify/functions"
+node_bundler = "esbuild"
+external_node_modules = ["@auth/mongodb-adapter", "mongodb", "mongoose"]
 
 [[edge_functions]]
 path = "/*"

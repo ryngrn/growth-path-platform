@@ -138,7 +138,7 @@ export const {
     },
   },
   trustHost: true,
-  debug: true,
+  debug: process.env.NODE_ENV === 'development',
   logger: {
     error(error: Error) {
       console.error('NextAuth error:', error);
@@ -147,7 +147,9 @@ export const {
       console.warn('NextAuth warning:', message);
     },
     debug(message: string, metadata?: unknown) {
-      console.log('NextAuth debug:', message, metadata);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('NextAuth debug:', message, metadata);
+      }
     },
   },
 }); 
