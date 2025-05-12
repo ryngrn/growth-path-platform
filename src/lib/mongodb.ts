@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 if (!process.env.MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+  throw new Error('Please define the MONGODB_URI environment variable inside .env');
 }
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -29,16 +29,14 @@ export async function connectToDatabase() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      maxPoolSize: 10,
-      minPoolSize: 5,
-      maxIdleTimeMS: 60000,
-      connectTimeoutMS: 30000,
-      socketTimeoutMS: 45000,
-      family: 4,
+      ssl: true,
+      tls: true,
+      tlsAllowInvalidCertificates: true,
+      tlsAllowInvalidHostnames: true,
       retryWrites: true,
-      retryReads: true,
-      serverSelectionTimeoutMS: 30000,
-      heartbeatFrequencyMS: 10000,
+      w: 'majority' as const,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
