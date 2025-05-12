@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { connectToDatabase } from '@/lib/server/mongodb';
-import { User } from '@/models/User';
+import { User as UserModel } from '@/models/User';
 import { compare } from 'bcryptjs';
 import clientPromise from '@/lib/server/mongodb-adapter';
 import { ObjectId } from 'mongodb';
@@ -91,7 +91,7 @@ export const auth = NextAuth({
         try {
           await connectToDatabase();
           const email = String(credentials.email).toLowerCase();
-          const user = await User.findOne({ email });
+          const user = await UserModel.findOne({ email });
 
           if (!user) {
             return null;
@@ -110,7 +110,7 @@ export const auth = NextAuth({
             id: (user._id as ObjectId).toString(),
             emailVerified: user.emailVerified ? new Date(user.emailVerified) : null,
             email: user.email || null,
-          } as NextAuthUser;
+          } as User;
         } catch (error) {
           console.error('Authentication error:', error);
           throw error;
@@ -132,11 +132,11 @@ export const auth = NextAuth({
     async session({ session, token }) {
       if (session.user) {
         session.user = {
-          id: token.id || '',
-          email: token.email || '',
-          name: token.name || '',
-          emailVerified: token.emailVerified || null,
-          image: token.image || null,
+          id: token.id as string || '',
+          email: token.email as string || '',
+          name: token.name as string || '',
+          emailVerified: token.emailVerified as Date | null || null,
+          image: token.image as string | null || null,
         };
       }
       return session;
@@ -191,7 +191,7 @@ export const auth = NextAuth({
   },
 });
 
-export const { signIn, signOut } = NextAuth();
+export const { signIn, signOut } = NextAuth(auth);
 
 // Export auth function for use in API routes
 export { NextAuth as getServerSession };
