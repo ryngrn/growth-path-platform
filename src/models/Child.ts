@@ -1,22 +1,29 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose from 'mongoose';
 
-export interface IChild extends Document {
-  name: string;
-  userId: mongoose.Types.ObjectId;
-  paths: mongoose.Types.ObjectId[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const ChildSchema = new Schema<IChild>(
+const childSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    paths: [{ type: Schema.Types.ObjectId, ref: 'Path' }],
+    name: {
+      type: String,
+      required: true,
+    },
+    gender: {
+      type: String,
+      enum: ['male', 'female', 'other'],
+      required: true,
+    },
+    birthday: {
+      type: Date,
+      required: true,
+    },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-const Child = mongoose.models.Child || mongoose.model<IChild>('Child', ChildSchema);
-
-export { Child }; 
+export const Child = mongoose.models.Child || mongoose.model('Child', childSchema); 
