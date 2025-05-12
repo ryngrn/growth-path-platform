@@ -70,7 +70,8 @@ export const {
 
           let user;
           try {
-            user = await User.findOne({ email: credentials.email.toLowerCase() });
+            const email = String(credentials.email).toLowerCase();
+            user = await User.findOne({ email });
             console.log('User lookup result:', user ? 'User found' : 'User not found');
           } catch (userError) {
             console.error('User lookup error:', userError);
@@ -84,10 +85,9 @@ export const {
 
           let isValid;
           try {
-            isValid = await compare(
-              credentials.password as string,
-              user.password as string
-            );
+            const password = String(credentials.password);
+            const hashedPassword = String(user.password);
+            isValid = await compare(password, hashedPassword);
             console.log('Password validation result:', isValid ? 'Valid' : 'Invalid');
           } catch (compareError) {
             console.error('Password comparison error:', compareError);
