@@ -56,49 +56,24 @@ export const {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+
         try {
-          if (!credentials?.email || !credentials?.password) {
-            console.error('Missing credentials');
-            return null;
-          }
-
-          let db;
-          try {
-            db = await connectToDatabase();
-            console.log('Connected to database successfully');
-          } catch (dbError) {
-            console.error('Database connection error:', dbError);
-            throw new Error('Unable to connect to database');
-          }
-
-          let user;
-          try {
-            const email = String(credentials.email).toLowerCase();
-            user = await User.findOne({ email });
-            console.log('User lookup result:', user ? 'User found' : 'User not found');
-          } catch (userError) {
-            console.error('User lookup error:', userError);
-            throw new Error('Error looking up user');
-          }
+          await connectToDatabase();
+          const email = String(credentials.email).toLowerCase();
+          const user = await User.findOne({ email });
 
           if (!user) {
-            console.error('No user found with email:', credentials.email);
             return null;
           }
 
-          let isValid;
-          try {
-            const password = String(credentials.password);
-            const hashedPassword = String(user.password);
-            isValid = await compare(password, hashedPassword);
-            console.log('Password validation result:', isValid ? 'Valid' : 'Invalid');
-          } catch (compareError) {
-            console.error('Password comparison error:', compareError);
-            throw new Error('Error validating password');
-          }
+          const password = String(credentials.password);
+          const hashedPassword = String(user.password);
+          const isValid = await compare(password, hashedPassword);
 
           if (!isValid) {
-            console.error('Invalid password for user:', credentials.email);
             return null;
           }
 
@@ -139,7 +114,7 @@ export const {
   },
   cookies: {
     sessionToken: {
-      name: `__Secure-next-auth.session-token`,
+      name: '__Secure-next-auth.session-token',
       options: {
         httpOnly: true,
         sameSite: 'lax',
@@ -148,7 +123,7 @@ export const {
       },
     },
     callbackUrl: {
-      name: `__Secure-next-auth.callback-url`,
+      name: '__Secure-next-auth.callback-url',
       options: {
         httpOnly: true,
         sameSite: 'lax',
@@ -157,7 +132,7 @@ export const {
       },
     },
     csrfToken: {
-      name: `__Host-next-auth.csrf-token`,
+      name: '__Host-next-auth.csrf-token',
       options: {
         httpOnly: true,
         sameSite: 'lax',
