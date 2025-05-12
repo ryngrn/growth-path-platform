@@ -19,7 +19,9 @@ status = 200
 node_bundler = "esbuild"
 external_node_modules = ["@auth/mongodb-adapter", "mongodb", "mongoose"]
 included_files = ["node_modules/mongodb/**/*"]
-timeout = 30
+
+[functions.timeout]
+external_node_modules = ["@auth/mongodb-adapter", "mongodb", "mongoose"]
 
 [build.cache]
 paths = [
