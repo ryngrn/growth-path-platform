@@ -33,12 +33,7 @@ declare module 'next-auth/jwt' {
   }
 }
 
-export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut,
-} = NextAuth({
+export const authOptions = {
   adapter: MongoDBAdapter(clientPromise),
   session: {
     strategy: 'jwt',
@@ -157,4 +152,11 @@ export const {
       }
     },
   },
-}); 
+};
+
+export const {
+  handlers: { GET, POST },
+  auth,
+  signIn,
+  signOut,
+} = NextAuth(authOptions); 

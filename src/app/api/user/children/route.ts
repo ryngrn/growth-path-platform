@@ -1,77 +1,77 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/auth';
 import { connectToDatabase } from '@/lib/mongodb';
 import { User } from '@/models/User';
 import { Child } from '@/models/Child';
 
 export async function GET() {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+        { error: 'Not authenticated' },
+        { status: 401 },
       );
     }
 
-    await connectToDatabase();
-    const user = await User.findOne({ email: session.user.email });
-    if (!user) {
+    const db = await connectToDatabase();
+    if (!db) {
       return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
+        { error: 'Database connection failed' },
+        { status: 500 },
       );
     }
 
-    const children = await Child.find({ userId: user._id });
+    const children = await Child.find({ userId: session.user.id });
     return NextResponse.json(children);
   } catch (error) {
+    console.error('Error fetching children:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: 'Failed to fetch children' },
+      { status: 500 },
     );
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+        { error: 'Not authenticated' },
+        { status: 401 },
       );
     }
 
-    const body = await req.json();
-    await connectToDatabase();
-
-    const user = await User.findOne({ email: session.user.email });
-    if (!user) {
+    const db = await connectToDatabase();
+    if (!db) {
       return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
+        { error: 'Database connection failed' },
+        { status: 500 },
       );
     }
 
+    const data = await request.json();
     const child = await Child.create({
-      ...body,
-      userId: user._id,
+      ...data,
+      userId: session.user.id,
     });
 
-    return NextResponse.json(child);
+    return NextResponse.json(child, { status: 201 });
   } catch (error) {
+    console.error('Error creating child:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: 'Failed to create child' },
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(req: Request) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
       return NextResponse.json({ status: 'error', message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -80,7 +80,11 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ status: 'error', message: 'Child ID is required' }, { status: 400 });
     }
 
-    await connectToDatabase();
+    const db = await connectToDatabase();
+    if (!db) {
+      return NextResponse.json({ status: 'error', message: 'Database connection failed' }, { status: 500 });
+    }
+
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
       return NextResponse.json({ status: 'error', message: 'User not found' }, { status: 404 });

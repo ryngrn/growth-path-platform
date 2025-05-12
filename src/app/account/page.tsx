@@ -1,143 +1,111 @@
 'use client';
 
-import React from 'react';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { Box, Typography, TextField, Button, Alert } from '@mui/material';
+import { useRouter } from 'next/navigation';
+import { Box, Typography, Button, TextField, CircularProgress } from '@mui/material';
+import { updateUserProfile } from '@/app/api/user/route';
 
 export default function AccountPage() {
-  const { data: session, update } = useSession();
-  const [isEditing, setIsEditing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
   });
 
   useEffect(() => {
-    if (session?.user) {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin');
+    } else if (session?.user) {
       setFormData({
         name: session.user.name || '',
         email: session.user.email || '',
       });
     }
-  }, [session]);
-
-  const handleEdit = () => {
-    setIsEditing(true);
-    setError(null);
-    setSuccess(null);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setFormData({
-      name: session?.user?.name || '',
-      email: session?.user?.email || '',
-    });
-    setError(null);
-  };
+  }, [session, status, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
+    setLoading(true);
+    setError('');
+    setSuccess('');
 
     try {
-      const response = await fetch('/api/user/update', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
+      const response = await updateUserProfile(formData);
+      if (response.ok) {
+        setSuccess('Profile updated successfully');
+      } else {
         const data = await response.json();
-        throw new Error(data.error || 'Failed to update profile');
+        setError(data.error || 'Failed to update profile');
       }
-
-      await update();
-      setSuccess('Profile updated successfully');
-      setIsEditing(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError('An error occurred while updating your profile');
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!session) {
+  if (status === 'loading') {
     return (
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h5">Please sign in to view your account</Typography>
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+        <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ p: 3, maxWidth: 600, mx: 'auto' }}>
-      <Typography variant="h4" gutterBottom>
+    <Box maxWidth="600px" mx="auto" p={3}>
+      <Typography variant="h4" component="h1" gutterBottom>
         Account Settings
       </Typography>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }}>
-          {success}
-        </Alert>
-      )}
-
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+      <form onSubmit={handleSubmit}>
         <TextField
           fullWidth
           label="Name"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          disabled={!isEditing}
           margin="normal"
+          required
         />
 
         <TextField
           fullWidth
           label="Email"
+          type="email"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          disabled={!isEditing}
           margin="normal"
+          required
+          disabled
         />
 
-        {isEditing ? (
-          <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-            >
-              Save Changes
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={handleCancel}
-            >
-              Cancel
-            </Button>
-          </Box>
-        ) : (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleEdit}
-            sx={{ mt: 2 }}
-          >
-            Edit Profile
-          </Button>
+        {error && (
+          <Typography color="error" sx={{ mt: 2 }}>
+            {error}
+          </Typography>
         )}
-      </Box>
+
+        {success && (
+          <Typography color="success.main" sx={{ mt: 2 }}>
+            {success}
+          </Typography>
+        )}
+
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          disabled={loading}
+          sx={{ mt: 3 }}
+        >
+          {loading ? <CircularProgress size={24} /> : 'Update Profile'}
+        </Button>
+      </form>
     </Box>
   );
 } 

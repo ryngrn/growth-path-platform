@@ -8,7 +8,7 @@ export async function GET() {
     if (!db || !db.connection.db) {
       return NextResponse.json(
         { error: 'Database connection failed' },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -22,16 +22,16 @@ export async function GET() {
         host: db.connection.host,
         name: db.connection.name,
         readyState: db.connection.readyState,
-      }
+      },
     });
   } catch (error) {
     console.error('MongoDB connection test failed:', error);
     return NextResponse.json(
       { 
         error: 'Database connection test failed',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 } 

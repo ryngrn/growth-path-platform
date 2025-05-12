@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/auth';
 import { connectToDatabase } from '@/lib/mongodb';
 import { User } from '@/models/User';
 import { hash } from 'bcryptjs';
 
 export async function GET() {
   try {
-    const session = await auth();
+    const session = await getServerSession(authOptions);
 
     if (!session) {
       return NextResponse.json(
@@ -17,11 +18,20 @@ export async function GET() {
 
     return NextResponse.json({
       authenticated: true,
-      session,
+      session: {
+        user: {
+          id: session.user.id,
+          name: session.user.name,
+          email: session.user.email,
+          image: session.user.image,
+        },
+        expires: session.expires,
+      },
     });
   } catch (error) {
+    console.error('Auth test error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to check authentication status' },
       { status: 500 },
     );
   }
