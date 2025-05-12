@@ -19,6 +19,7 @@ declare module 'next-auth' {
     email?: string | null;
     name?: string | null;
     emailVerified?: Date | null;
+    image?: string | null;
   }
 
   interface Session {
@@ -27,6 +28,7 @@ declare module 'next-auth' {
       email?: string | null;
       name?: string | null;
       emailVerified?: Date | null;
+      image?: string | null;
     };
   }
 }
@@ -37,6 +39,7 @@ declare module 'next-auth/jwt' {
     name?: string | null;
     email?: string | null;
     emailVerified?: Date | null;
+    image?: string | null;
   }
 }
 
@@ -84,6 +87,7 @@ export const authOptions: NextAuthConfig = {
             email: user.email,
             name: user.name,
             emailVerified: user.emailVerified,
+            image: user.image,
           };
         } catch (error) {
           console.error('Authentication error:', error);
@@ -93,22 +97,24 @@ export const authOptions: NextAuthConfig = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: { token: JWT; user: any }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
         token.emailVerified = user.emailVerified;
+        token.image = user.image;
       }
       return token;
     },
-    async session({ session, token }: { session: Session; token: JWT }) {
+    async session({ session, token }) {
       if (session.user) {
         session.user = {
           id: token.id || '',
           email: token.email || '',
           name: token.name || '',
           emailVerified: token.emailVerified || null,
+          image: token.image || null,
         };
       }
       return session;
@@ -168,8 +174,5 @@ export const {
   signOut,
 } = NextAuth(authOptions);
 
-// Export getServerSession separately
-export const getServerSession = async () => {
-  const session = await auth();
-  return session;
-}; 
+// Export auth function for use in API routes
+export { auth as getServerSession }; 

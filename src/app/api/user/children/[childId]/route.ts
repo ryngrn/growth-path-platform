@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/auth';
+import { auth } from '@/auth';
 import { connectToDatabase } from '@/lib/server/mongodb';
 import { Child } from '@/models/Child';
 
@@ -9,7 +8,7 @@ export async function GET(
   { params }: { params: { childId: string } },
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Not authenticated' },
@@ -52,7 +51,7 @@ export async function PUT(
   { params }: { params: { childId: string } },
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Not authenticated' },
@@ -100,7 +99,7 @@ export async function DELETE(
   { params }: { params: { childId: string } },
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Not authenticated' },

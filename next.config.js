@@ -41,6 +41,9 @@ const nextConfig = {
         constants: false,
         'mongodb-oidc': false,
         aws4: false,
+        socks: false,
+        'mongodb': false,
+        '@auth/mongodb-adapter': false,
       };
     }
     config.resolve.alias = {
