@@ -122,9 +122,9 @@ export const {
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
-        session.user.email = token.email;
-        session.user.name = token.name;
+        session.user.id = token.id ?? null;
+        session.user.email = token.email ?? null;
+        session.user.name = token.name ?? null;
       }
       return session;
     },
