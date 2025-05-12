@@ -35,8 +35,13 @@ export async function connectToDatabase() {
       tlsAllowInvalidHostnames: true,
       retryWrites: true,
       w: 'majority' as const,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      maxPoolSize: 10,
+      minPoolSize: 5,
+      maxIdleTimeMS: 60000,
+      connectTimeoutMS: 30000,
+      socketTimeoutMS: 45000,
+      serverSelectionTimeoutMS: 30000,
+      heartbeatFrequencyMS: 10000,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
