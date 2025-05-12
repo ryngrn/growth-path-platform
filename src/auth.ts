@@ -123,9 +123,9 @@ export const {
     async session({ session, token }) {
       if (session.user) {
         session.user = {
-          id: token.id || null,
-          email: token.email || null,
-          name: token.name || null,
+          id: token.id || '',
+          email: token.email || '',
+          name: token.name || '',
         };
       }
       return session;
