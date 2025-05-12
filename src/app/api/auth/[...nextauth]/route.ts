@@ -1,4 +1,4 @@
 import NextAuth from 'next-auth'
-import { authOptions } from '@/auth'
+import { auth } from '@/auth'
 
-export default NextAuth(authOptions) 
+export default auth 

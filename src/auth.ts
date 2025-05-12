@@ -1,14 +1,35 @@
-import NextAuth, { type NextAuthConfig } from 'next-auth';
-import { MongoDBAdapter } from '@auth/mongodb-adapter';
+import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { connectToDatabase } from '@/lib/server/mongodb';
 import { User } from '@/models/User';
 import { compare } from 'bcryptjs';
 import clientPromise from '@/lib/server/mongodb-adapter';
 import { ObjectId } from 'mongodb';
-import type { NextAuthOptions } from 'next-auth';
-import { Session, User as NextAuthUser } from 'next-auth';
-import { JWT } from 'next-auth/jwt';
+import { MongoDBAdapter } from '@auth/mongodb-adapter';
+
+// Define types for next-auth
+interface User {
+  id: string;
+  email: string;
+  name?: string;
+  emailVerified?: Date;
+  image?: string;
+  password?: string;
+  firstName?: string;
+  familyName?: string;
+}
+
+interface Session {
+  user: User;
+}
+
+interface JWT {
+  id: string;
+  email: string;
+  name?: string;
+  emailVerified?: Date;
+  image?: string;
+}
 
 // Add server-side only check
 if (typeof window !== 'undefined') {
@@ -45,7 +66,7 @@ declare module 'next-auth/jwt' {
   }
 }
 
-export const authOptions: NextAuthConfig = {
+export const auth = NextAuth({
   adapter: MongoDBAdapter(clientPromise),
   session: {
     strategy: 'jwt' as const,
@@ -168,14 +189,9 @@ export const authOptions: NextAuthConfig = {
       }
     },
   },
-};
+});
 
-export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut,
-} = NextAuth(authOptions);
+export const { signIn, signOut } = NextAuth();
 
 // Export auth function for use in API routes
-export { auth as getServerSession }; 
+export { NextAuth as getServerSession };
