@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
 
+// Add server-side only check
+if (typeof window !== 'undefined') {
+  throw new Error('This module can only be used on the server side');
+}
+
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
@@ -30,7 +35,6 @@ export async function connectToDatabase() {
     const opts = {
       bufferCommands: false,
       ssl: true,
-      tls: true,
       retryWrites: true,
       w: 'majority' as const,
       maxPoolSize: 10,
@@ -41,11 +45,6 @@ export async function connectToDatabase() {
       serverSelectionTimeoutMS: 30000,
       heartbeatFrequencyMS: 10000,
       family: 4, // Force IPv4
-      // Explicit TLS configuration
-      tlsInsecure: false,
-      directConnection: false,
-      // Add monitoring for connection issues
-      monitorCommands: true,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI as string, opts)

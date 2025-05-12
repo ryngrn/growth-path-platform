@@ -8,6 +8,11 @@ import clientPromise from '@/lib/mongodb-adapter';
 import type { JWT } from 'next-auth/jwt';
 import type { Session } from 'next-auth';
 
+// Add server-side only check
+if (typeof window !== 'undefined') {
+  throw new Error('This module can only be used on the server side');
+}
+
 declare module 'next-auth' {
   interface User {
     id?: string | null;
@@ -161,4 +166,10 @@ export const {
   auth,
   signIn,
   signOut,
-} = NextAuth(authOptions); 
+} = NextAuth(authOptions);
+
+// Export getServerSession separately
+export const getServerSession = async () => {
+  const session = await auth();
+  return session;
+}; 
